@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
                 cerr << "Не задан параметр одной из опций" << "\n" << endl;
                 break;
             default:
-                cerr << "Неправильный параметр: " << char(optopt) << endl;
+                cerr << "Неправильный параметр: " << char(optopt) << endl; // значения опции, которая не была распознана ("?")
                 SupportedOperations();
                 return 1;
         }
