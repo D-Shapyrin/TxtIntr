@@ -1,47 +1,64 @@
 #include <iostream>
 #include <cmath>
 #include <string>
+#include <unistd.h>
 
 using namespace std;
 
-void SupportedOperations(int argc, char* argv[]) {
-    // for (int i = 1; i < argc; ++i) {std::cout << "Аргумент " << i << ": " << argv[i] << std::endl;}  // введенные аргументы
+void SupportedOperations() {
     cout << "Поддерживаемые операции:" << endl;
     cout << "  -o exp 'x'   (возведение e в степень x)" << endl;
     cout << "  -o pow 'x' 'y'  (возведение x в степень y)" << endl;
 }
 
 int main(int argc, char* argv[]) {
-    if (argc < 2) {
-        cout << "Калькулятор для возведения 'e' в степень 'x' или возведения 'x' в степень 'y'." << endl;
-        SupportedOperations(argc, argv);
+    int option;
+    string operationType;
+    double operand1, operand2;
+
+    while ((option = getopt(argc, argv, "o:")) != -1) { // "o" имеет значение
+        switch (option) {
+            case 'o':
+                operationType = optarg;
+                break;
+            case '?':
+                cerr << "Не задан параметр одной из опций" << "\n" << endl;
+                break;
+            default:
+                cerr << "Неправильный параметр: " << char(optopt) << endl;
+                SupportedOperations();
+                return 1;
+        }
+    }
+
+    if (operationType.empty()) {
+        cerr << "Отсутствует обязательный параметр -o." << endl;
+        SupportedOperations();
         return 1;
     }
 
-    string operation = argv[1];
-    // cout << argc << endl; 
-    if (operation == "-o" && argc > 3) { //1
-        
-        string operationType = argv[2]; 
-        for (int i = 1; i < argc; ++i) {std::cout << "Аргумент " << i << ": " << argv[i] << std::endl;}
-        
-        if (operationType == "exp") {
-            double operand1 = stod(argv[3]);
-            cout << "Результат: " << exp(operand1) << endl;
-        } else if (operationType == "pow") {
-            double operand1 = stod(argv[3]);
-            double operand2 = stod(argv[4]);
-            cout << "Результат: " << pow(operand1, operand2) << endl;
-        } else {
-            cout << "Неподдерживаемая операция! " << operationType << endl;
-            SupportedOperations(argc, argv);
+    if (operationType == "exp") {
+        if (optind >= argc) {
+            cerr << "Отсутствует обязательный аргумент 'x'." << endl;
+            SupportedOperations();
             return 1;
         }
+        operand1 = stod(argv[optind]);  //optind некст элемент в argv
+        cout << "Результат: " << exp(operand1) << endl;
+    } else if (operationType == "pow") {
+        if (optind + 1 >= argc) {
+            cerr << "Отсутствуют обязательные аргументы 'x' и 'y'." << endl;
+            SupportedOperations();
+            return 1;
+        }
+        operand1 = stod(argv[optind]);
+        operand2 = stod(argv[optind + 1]);
+        cout << "Результат: " << pow(operand1, operand2) << endl;
     } else {
-        cout << "Неправильный формат команды." << endl;
-        SupportedOperations(argc, argv);
+        cerr << "Неподдерживаемая операция! " << operationType << endl;
+        SupportedOperations();
         return 1;
-    } 
-    
+    }
+
     return 0;
 }
